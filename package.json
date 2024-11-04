@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@playwright/test": "^1.48.2",
+    "papaparse": "^5.4.1",
     "playwright": "^1.48.2"
   }
 }
