@@ -44,6 +44,7 @@ const fs = require("fs");
     const totalPages = Math.ceil(totalRentals / listingsPerPage);
     console.log(`Total Rentals: ${totalRentals}, Total Pages: ${totalPages}`);
 
+    // Loop through pages
     for (let currentPage = 1; currentPage <= totalRentals; currentPage++) {
       const url = `${baseUrl}?p=${currentPage}`;
       console.log(`Navigating to Page ${currentPage}: ${url}`);
@@ -77,7 +78,7 @@ const fs = require("fs");
       );
 
       console.log(`Found ${listings.length} listings on page ${currentPage}`);
-
+      // Stop if no listings are found
       if (listings.length === 0) {
         console.log(`No listings found on page ${currentPage}`);
         break;
@@ -85,6 +86,7 @@ const fs = require("fs");
 
       // Iterate over each listing and fetch details
       for (const listing of listings) {
+        // Skip listings without a details link
         if (!listing.detailsLink || listing.detailsLink === "N/A") {
           console.warn(
             `Skipping listing with missing details link: ${listing.title}`
@@ -93,6 +95,7 @@ const fs = require("fs");
         }
 
         try {
+          // Navigate to the listing's detail page
           await page.goto(listing.detailsLink, {
             waitUntil: "domcontentloaded",
             timeout: 120000,
@@ -104,6 +107,7 @@ const fs = require("fs");
 
           // Scrape additional information from the details page
           const details = await page.evaluate(() => {
+            // Extract highlighted information
             const highlightedInfo = Array.from(
               document.querySelectorAll(".listing-highlighted-info__item")
             ).reduce((info, item) => {
@@ -113,6 +117,7 @@ const fs = require("fs");
               return info;
             }, {});
 
+            // Extract grouped floor plans and unit details
             const floorPlansGrouped = Array.from(
               document.querySelectorAll(".floor-plan-group--collapsible")
             ).map((group) => {
@@ -136,11 +141,12 @@ const fs = require("fs");
               }));
               return { bedroomType, units };
             });
-
+            // Check if the contact button is visible
             const contactVisible =
               document.querySelector(
                 ".listing-overview__contact-property-button"
               )?.style.display !== "none";
+            // Extract promotions
             const promotionsTitle =
               document.querySelector(".listing-promotions__title")?.innerText ||
               "No Promotions";
@@ -152,7 +158,7 @@ const fs = require("fs");
               ?.innerText.includes("Utilities")
               ? "Utilities Included"
               : "None";
-
+            // Extract neighborhood scores
             const neighborhoodScores = Array.from(
               document.querySelectorAll(".ll-module__item--radio")
             ).map((score) => ({
@@ -164,6 +170,7 @@ const fs = require("fs");
                 "N/A",
             }));
 
+            // Extract features and amenities by category
             const featuresAndAmenities = {};
             const categories = document.querySelectorAll(
               ".listing-features-and-amenities-desktop__title .btn-cta"
@@ -187,7 +194,7 @@ const fs = require("fs");
                 ".listing-features-and-amenities__content li"
               )
             ).map((item) => item.innerText);
-
+            // Return all scraped data for the listing
             return {
               highlightedInfo,
               floorPlansGrouped,
