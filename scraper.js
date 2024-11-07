@@ -137,12 +137,6 @@ const fs = require("fs");
               return { bedroomType, units };
             });
 
-            const amenities = Array.from(
-              document.querySelectorAll(
-                ".listing-features-and-amenities__content li"
-              )
-            ).map((item) => item.innerText);
-
             const contactVisible =
               document.querySelector(
                 ".listing-overview__contact-property-button"
@@ -159,16 +153,6 @@ const fs = require("fs");
               ? "Utilities Included"
               : "None";
 
-            // const neighborhoodScores = Array.from(
-            //   document.querySelectorAll(".ll-module__item--radio")
-            // ).map((score) => ({
-            //   title:
-            //     score.querySelector(".ll-score__title span")?.innerText ||
-            //     "N/A",
-            //   value:
-            //     score.querySelector(".ll-score__badge span")?.innerText ||
-            //     "N/A",
-            // }));
             const neighborhoodScores = Array.from(
               document.querySelectorAll(".ll-module__item--radio")
             ).map((score) => ({
@@ -179,6 +163,30 @@ const fs = require("fs");
                 score.querySelector(".ll-score__badge span")?.innerText ||
                 "N/A",
             }));
+
+            const featuresAndAmenities = {};
+            const categories = document.querySelectorAll(
+              ".listing-features-and-amenities-desktop__title .btn-cta"
+            );
+
+            categories.forEach((category, index) => {
+              const categoryName = category.innerText.trim();
+              const items = Array.from(
+                document
+                  .querySelectorAll(
+                    ".listing-features-and-amenities-desktop__content ul"
+                  )
+                  [index].querySelectorAll("li")
+              ).map((li) => li.innerText.trim());
+
+              featuresAndAmenities[categoryName] = items;
+            });
+
+            const amenities = Array.from(
+              document.querySelectorAll(
+                ".listing-features-and-amenities__content li"
+              )
+            ).map((item) => item.innerText);
 
             return {
               highlightedInfo,
@@ -191,6 +199,7 @@ const fs = require("fs");
               },
               utilitiesIncluded,
               neighborhoodScores,
+              featuresAndAmenities,
             };
           });
 
